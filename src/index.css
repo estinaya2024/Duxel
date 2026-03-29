@@ -1,0 +1,117 @@
+@import url('https://fonts.googleapis.com/css2?family=Amatic+SC:wght@400;700&family=Nunito:wght@300;400;600;700;800&display=swap');
+
+:root {
+  /* Nunito as the base professional font */
+  font-family: 'Nunito', sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+
+  color-scheme: light dark;
+  color: #333333;
+  background-color: #fdfaf6; /* Warm Paper */
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  --bg-primary: #fdfaf6;
+  --bg-secondary: #f6efe6;
+  --bg-tertiary: #ede4d8;
+  --text-primary: #2a2a2a;
+  --text-secondary: #5a5a5a;
+  --text-muted: #8a8a8a;
+  --border-subtle: rgba(0, 0, 0, 0.05);
+  --border-light: rgba(0, 0, 0, 0.08);
+  --radius-fun: 40px;
+  --radius-sm: 24px;
+  --radius-md: 32px;
+  --shadow-primary: 0 15px 45px -15px rgba(0,0,0,0.08);
+  --shadow-accent: 0 15px 45px -15px rgba(0,0,0,0.12);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  overflow-x: hidden;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+  background-blend-mode: soft-light;
+  opacity: 0.98;
+  font-size: 1.1rem; 
+}
+
+h1, h2, h3, h4, h5, h6, .font-serif {
+  font-family: 'Amatic SC', cursive;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  line-height: 1.1;
+}
+
+/* Specific overrides for professional feel */
+p, span, div, button, input, textarea {
+  font-family: 'Nunito', sans-serif;
+  font-weight: 500;
+}
+
+button {
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  font-family: 'Nunito', sans-serif;
+}
+
+/* Organic Blob Utilities - Refined */
+.blob-1 { border-radius: 40% 60% 70% 30% / 40% 50% 50% 60%; }
+.blob-2 { border-radius: 60% 40% 30% 70% / 60% 40% 60% 40%; }
+.blob-3 { border-radius: 50% 50% 50% 50% / 50% 50% 50% 50%; }
+
+/* Duxel Sticker Effect - Subtler Professionalism */
+.duxel-sticker-effect {
+  filter: drop-shadow(4px 4px 0px rgba(0,0,0,0.05));
+  transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.duxel-sticker-effect:hover {
+  transform: scale(1.02) translateY(-4px);
+  filter: drop-shadow(10px 10px 0px rgba(0,0,0,0.03));
+}
+
+.scrapbook-card {
+  background: white;
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md);
+  padding: 3rem;
+  box-shadow: var(--shadow-primary);
+  display: flex;
+  flex-direction: column;
+}
+
+.label-sticker {
+  display: inline-block;
+  padding: 0.6rem 1.2rem;
+  background: var(--theme-secondary-transparent);
+  color: var(--text-primary);
+  font-size: 0.9rem;
+  font-weight: 800;
+  font-family: 'Amatic SC', cursive;
+  border-radius: 50px;
+  box-shadow: 2px 2px 8px rgba(0,0,0,0.05);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.organic-divider {
+  height: 1px;
+  background: var(--border-subtle);
+  margin: 2.5rem 0;
+  width: 100%;
+}
+
