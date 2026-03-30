@@ -22,3 +22,18 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Python
+.venv/
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Scratch / debug files
+brain_sizes.txt
+error.txt
+refine_steps.py
+remove_bg.py
+
+# Build artifacts
+color-master.json

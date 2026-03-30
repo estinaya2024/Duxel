@@ -9,14 +9,14 @@ interface ExportModalProps {
   onClose: () => void;
 }
 
-type ExportFormat = 'css' | 'tailwind' | 'figma' | 'ase' | 'share';
+type ExportFormat = 'css' | 'tailwind' | 'figma' | 'svg' | 'tokens';
 
 const TABS: { id: ExportFormat; label: string }[] = [
   { id: 'css', label: 'CSS' },
   { id: 'tailwind', label: 'Tailwind' },
   { id: 'figma', label: 'Figma Tokens' },
-  { id: 'ase', label: 'ASE Swatch' },
-  { id: 'share', label: 'Share URL' },
+  { id: 'svg', label: 'SVG Palette' },
+  { id: 'tokens', label: 'JSON Tokens' },
 ];
 
 export const ExportModal: React.FC<ExportModalProps> = ({ theme, onClose }) => {
@@ -50,16 +50,35 @@ export const ExportModal: React.FC<ExportModalProps> = ({ theme, onClose }) => {
           2
         );
 
-      case 'share':
-      case 'ase': {
-        const params = new URLSearchParams({
-          p: primary.replace('#', ''),
-          s: secondary.replace('#', ''),
-          a: accent.replace('#', ''),
-          bg: background.replace('#', ''),
-          sf: surface.replace('#', ''),
+      case 'tokens':
+        return JSON.stringify(
+          {
+            name: config.moodName || 'Custom Theme',
+            colors: { primary, secondary, accent, background, surface },
+            metadata: { generated: new Date().toISOString(), engine: 'Duxel Neuro-Vision' }
+          },
+          null,
+          2
+        );
+
+      case 'svg': {
+        const swatches = [
+          { label: 'Primary', hex: primary },
+          { label: 'Secondary', hex: secondary },
+          { label: 'Accent', hex: accent },
+          { label: 'Background', hex: background },
+          { label: 'Surface', hex: surface },
+        ];
+        
+        let svg = `<svg width="500" height="150" viewBox="0 0 500 150" fill="none" xmlns="http://www.w3.org/2000/svg">\n`;
+        swatches.forEach((s, i) => {
+          const x = 25 + (i * 95);
+          svg += `  <circle cx="${x}" cy="60" r="40" fill="${s.hex}" />\n`;
+          svg += `  <text x="${x}" y="125" text-anchor="middle" fill="#888" style="font-family:sans-serif;font-size:10px;font-weight:bold;text-transform:uppercase">${s.label}</text>\n`;
+          svg += `  <text x="${x}" y="140" text-anchor="middle" fill="#bbb" style="font-family:monospace;font-size:9px">${s.hex.toUpperCase()}</text>\n`;
         });
-        return `${window.location.origin}${window.location.pathname}?${params.toString()}`;
+        svg += `</svg>`;
+        return svg;
       }
 
       default:
@@ -88,20 +107,19 @@ export const ExportModal: React.FC<ExportModalProps> = ({ theme, onClose }) => {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const handleASEDownload = () => {
-    const buf = buildASEBuffer(config);
-    const blob = new Blob([buf], { type: 'application/octet-stream' });
+  const handleDownload = () => {
+    const isSVG = format === 'svg';
+    const blob = new Blob([code], { type: isSVG ? 'image/svg+xml' : 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `duxel-${(config.moodName || 'theme').replace(/[^a-z0-9]/gi, '-').toLowerCase()}.ase`;
+    a.download = `duxel-${(config.moodName || 'theme').replace(/[^a-z0-9]/gi, '-').toLowerCase()}.${isSVG ? 'svg' : 'json'}`;
     a.click();
     URL.revokeObjectURL(url);
     triggerCopied();
   };
 
-  const isASE = format === 'ase';
-  const isShare = format === 'share';
+  const isDownloadable = format === 'svg' || format === 'tokens';
 
   return (
     <motion.div
@@ -186,69 +204,39 @@ export const ExportModal: React.FC<ExportModalProps> = ({ theme, onClose }) => {
             </button>
           ))}
         </div>
-
-        {/* Code Panel or Share UI */}
-        {isShare ? (
-          <div style={{ textAlign: 'center', padding: '3rem 2rem', background: 'rgba(0,0,0,0.2)', borderRadius: '24px', border: '1px solid var(--border-subtle)' }}>
-            <Link size={40} style={{ color: config.primary, marginBottom: '1rem' }} />
-            <h3 style={{ fontSize: '1.5rem', fontWeight: 900, marginBottom: '0.75rem' }}>Share Your Theme</h3>
-            <p style={{ opacity: 0.55, fontSize: '0.9rem', marginBottom: '2rem', lineHeight: 1.5 }}>
-              This URL encodes your entire theme. Anyone who opens it will see your exact palette loaded instantly.
-            </p>
-            <div
-              style={{
-                background: 'rgba(0,0,0,0.3)',
-                borderRadius: '14px',
-                padding: '1rem 1.5rem',
-                fontFamily: 'monospace',
-                fontSize: '0.75rem',
-                color: config.primary,
-                wordBreak: 'break-all',
-                marginBottom: '1.5rem',
-                border: '1px solid var(--border-subtle)',
-              }}
-            >
-              {code}
-            </div>
-            <motion.button
-              whileHover={{ scale: 1.04 }}
-              whileTap={{ scale: 0.96 }}
-              onClick={handleCopy}
-              className="creative-button"
-              style={{ padding: '0.9rem 2.5rem', fontSize: '0.9rem', fontFamily: 'Nunito', fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}
-            >
-              {copied ? <Check size={18} /> : <Copy size={18} />}
-              {copied ? 'Link Copied!' : 'Copy Share Link'}
-            </motion.button>
-          </div>
-        ) : isASE ? (
+        {/* Code Panel or Download UI */}
+        {isDownloadable ? (
           <div style={{ textAlign: 'center', padding: '3rem 2rem', background: 'rgba(0,0,0,0.2)', borderRadius: '24px', border: '1px solid var(--border-subtle)' }}>
             <div style={{ width: '48px', height: '6px', borderRadius: '3px', background: `linear-gradient(90deg, ${config.primary}, ${config.secondary}, ${config.accent})`, margin: '0 auto 1.5rem' }} />
-            <h3 style={{ fontSize: '1.5rem', fontWeight: 900, marginBottom: '0.75rem' }}>Adobe Swatch Exchange</h3>
-            <p style={{ opacity: 0.55, fontSize: '0.9rem', marginBottom: '1rem', lineHeight: 1.5 }}>
-              Downloads a binary <code style={{ fontFamily: 'monospace', opacity: 0.9 }}>.ase</code> file containing all 5 theme colors.{' '}
-              Import directly into <strong>Photoshop</strong>, <strong>Illustrator</strong>, or <strong>InDesign</strong>.
+            <h3 style={{ fontSize: '1.5rem', fontWeight: 900, marginBottom: '0.75rem' }}>
+              {format === 'svg' ? 'SVG Graphic Palette' : 'JSON Design Tokens'}
+            </h3>
+            <p style={{ opacity: 0.55, fontSize: '0.9rem', marginBottom: '2rem', lineHeight: 1.5 }}>
+              {format === 'svg' 
+                ? 'Download a vectorized graphic palette. Perfect for dragging into Figma, Sketch, or Adobe tools.' 
+                : 'Download a clean JSON file containing all color tokens and metadata for your development pipeline.'}
             </p>
-            <div style={{ display: 'flex', justifyContent: 'center', gap: '0.75rem', marginBottom: '2rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'center', gap: '0.75rem', marginBottom: '2rem', flexWrap: 'wrap' }}>
               {[config.primary, config.secondary, config.accent, config.background, config.surface].map((c, i) => (
                 <div key={i} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px' }}>
-                  <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: c, border: '1px solid rgba(255,255,255,0.1)' }} />
-                  <span style={{ fontSize: '0.55rem', fontFamily: 'monospace', opacity: 0.6 }}>{c.toUpperCase()}</span>
+                  <div style={{ width: '44px', height: '44px', borderRadius: '12px', background: c, border: '1px solid rgba(255,255,255,0.1)' }} />
+                  <span style={{ fontSize: '0.5rem', fontFamily: 'monospace', opacity: 0.6 }}>{c.toUpperCase()}</span>
                 </div>
               ))}
             </div>
             <motion.button
               whileHover={{ scale: 1.04 }}
               whileTap={{ scale: 0.96 }}
-              onClick={handleASEDownload}
+              onClick={handleDownload}
               className="creative-button"
-              style={{ padding: '0.9rem 2.5rem', fontSize: '0.9rem', fontFamily: 'Nunito', fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}
+              style={{ padding: '0.9rem 2.5rem', fontSize: '0.9rem', fontFamily: 'Nunito', fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: '0.5rem', margin: '0 auto' }}
             >
               {copied ? <Check size={18} /> : <Download size={18} />}
-              {copied ? 'Downloading!' : 'Download .ase File'}
+              {copied ? 'SUCCESS!' : `Download .${format === 'svg' ? 'svg' : 'json'} File`}
             </motion.button>
           </div>
         ) : (
+
           <div style={{ position: 'relative' }}>
             <pre
               style={{

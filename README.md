@@ -1,73 +1,135 @@
-# React + TypeScript + Vite
+# 🦆 Duxel Studio — Visual Identity System
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+> **A professional-grade color palette generator and design system studio.**  
+> Upload an image, search a color, or roll the dice — Duxel Studio builds your entire visual identity in seconds.
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## ✨ Features
 
-## React Compiler
+### 🎨 Color DNA Extraction
+- Upload any image and extract its **top 5 dominant colors** using a K-Means++ clustering algorithm in perceptual OKLCH color space
+- Interactive **Dominance Hierarchy Bar** shows each color's pixel weight across the image
+- **Latent DNA Discovery** reveals up to 24 rare secondary shades hidden in your image
+- Click any extracted color to **map it to a design role** (Primary, Secondary, Accent, Background, Surface) via the Role Mapper overlay
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+### 🔍 Smart Color Search
+- Search by **color name**, **HEX**, **RGB**, or **CMYK** — supports 800+ designer-grade color names
+- Instantly generates a full theme from any valid color input
 
-## Expanding the ESLint configuration
+### 🌗 Theme Generation
+- **5 design roles** per theme: Hero Primary, Secondary, Accent, Base, Surface
+- Full **shade scales** generated for each role (50–950)
+- One-click **Night Mode** generation — automatically derives a dark variant of your current palette
+- **Surprise** button for instant random theme generation
+- **Gradient / Solid** toggle for all preview mockups
+- Full **Undo / Redo** history
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+### 👁️ Live Preview Mockups
+Switch between 4 animated preview modes to see your theme in context:
+| Mode | Description |
+|------|-------------|
+| **Storefront Story** | Landing page hero with CTAs |
+| **Community Journal** | Dashboard / analytics UI |
+| **Mobile App** | iOS-style app shell |
+| **Product Grid** | E-commerce card layout |
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+### 💾 Save & Export
+- **Save Studio** — name and persist any theme to `localStorage`
+- **Export Code** — exports your palette as:
+  - CSS Custom Properties
+  - JSON Design Tokens
+  - SVG Swatches
+  - Figma-ready Token format
+- **URL sharing** — themes are encoded into URL query parameters for easy sharing
+- **Copy HEX** — right-click any swatch or click on the bar to copy its hex code instantly
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+### 🎯 Harmony Explorer
+- Explore color relationships: Complementary, Triadic, Analogous, Split-Complementary, and more
+- One-click to apply any harmony variant to your active theme
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+---
+
+## 🛠️ Tech Stack
+
+| Layer | Technology |
+|-------|-----------|
+| Framework | React 19 + TypeScript |
+| Build Tool | Vite 8 |
+| Animations | Framer Motion |
+| Color Science | Chroma.js (OKLCH, LAB, contrast) |
+| Color Extraction | node-vibrant + custom K-Means++ |
+| Icons | Lucide React |
+| Styling | Vanilla CSS with CSS Custom Properties |
+
+---
+
+## 🚀 Getting Started
+
+### Prerequisites
+- Node.js 18+
+- npm
+
+### Install & Run
+
+```bash
+# Install dependencies
+npm install
+
+# Start the dev server
+npm run dev
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+The app will be available at `http://localhost:5173`.
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+### Build for Production
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm run build
 ```
+
+Output will be in the `dist/` folder.
+
+---
+
+## 📁 Project Structure
+
+```
+src/
+├── components/
+│   ├── ColorPicker.tsx        # Inline color role editor
+│   ├── PaletteDisplay.tsx     # Shade scale column
+│   ├── HarmonyExplorer.tsx    # Color harmony relationships
+│   ├── PreviewDashboard.tsx   # Dashboard mockup
+│   ├── LandingPagePreview.tsx # Landing page mockup
+│   ├── MobileAppPreview.tsx   # Mobile app mockup
+│   ├── ProductCardPreview.tsx # Product grid mockup
+│   ├── ExportModal.tsx        # Export panel
+│   └── SavedPalettes.tsx      # Saved themes shelf
+├── utils/
+│   └── palette.ts             # Theme generation, extraction, color math
+├── App.tsx                    # Root application
+└── App.css                    # Design system & global styles
+public/
+├── duck1.png                  # Logo asset
+├── duck5.png                  # Decorative sticker
+├── fish.png                   # Decorative sticker
+└── steps.png                  # Decorative sticker
+```
+
+---
+
+## 🎮 How to Use
+
+1. **Upload a source image** — click "Upload Source" and choose any photo. Duxel will extract and synthesize a full 5-role palette.
+2. **Search a color** — type any color name, HEX (`#3a7bd5`), RGB (`rgb(58,123,213)`), or CMYK into the search bar.
+3. **Customize roles** — tap any color swatch in the Color Picker to fine-tune individual roles.
+4. **Map latent shades** — click any swatch in the "Rare Findings" section to assign it to a design role.
+5. **Preview your theme** — switch between the 4 mockup modes to validate your palette in real UI contexts.
+6. **Export** — click "Export Code" to copy your palette as CSS, JSON tokens, or SVG.
+
+---
+
+## 📄 License
+
+Private project. All rights reserved.

@@ -1,5 +1,6 @@
 import chroma from 'chroma-js';
-import { Vibrant } from 'node-vibrant/browser';
+// Vibrant removed in favor of exact Duxel Quantizer
+import { EXTENDED_COLORS } from './extendedColors';
 
 export interface ThemeConfig {
   primary: string;
@@ -23,6 +24,8 @@ export interface FullTheme {
     primary: Palette;
     secondary: Palette;
     accent: Palette;
+    background: Palette;
+    surface: Palette;
   };
 }
 
@@ -168,103 +171,328 @@ export const detectMoodFromPalette = (primaryHex: string): string => {
   return 'Curated Aesthetic';
 };
 
-export const generateThemeFromSeed = (seedColor: string): ThemeConfig => {
+export const validateColor = (input: string): string | null => {
+  let sanitized = input.trim();
+  if (!sanitized) return null;
+  
+  // 1. Try directly with chroma (handles standard CSS names, hex, and functional rgb/rgba/cmyk)
+  if (chroma.valid(sanitized)) return chroma(sanitized).hex();
+  
+  // 2. Try English Name Matching (Normalized)
+  const normalized = sanitized.toLowerCase().replace(/\s/g, '');
+  if (EXTENDED_COLORS[normalized]) return EXTENDED_COLORS[normalized];
+  
+  // 3. --- Raw Triplet/Quartet Parsing (No function wrapper) ---
+  const parts = sanitized.split(/[,\s]+/).filter(p => p !== '');
+  
+  if (parts.length === 3) {
+    const [r, g, b] = parts.map(v => parseFloat(v));
+    if (!isNaN(r) && !isNaN(g) && !isNaN(b)) {
+      if (r >= 0 && r <= 255 && g >= 0 && g <= 255 && b >= 0 && b <= 255) {
+        return chroma(r, g, b).hex();
+      }
+    }
+  } else if (parts.length === 4) {
+    const [c, m, y, k] = parts.map(v => parseFloat(v));
+    if (!isNaN(c) && !isNaN(m) && !isNaN(y) && !isNaN(k)) {
+      if (c >= 0 && m >= 0 && y >= 0 && k >= 0) {
+        // Assume 0-100 if any value is > 1
+        const is100 = c > 1 || m > 1 || y > 1 || k > 1;
+        const norm = (v: number) => is100 ? v / 100 : v;
+        try {
+          return chroma.cmyk(norm(c), norm(m), norm(y), norm(k)).hex();
+        } catch { return null; }
+      }
+    }
+  }
+
+  // 4. --- Enhanced Hex Recovery Strategy ---
+  // Users often swap 'O' for '0' or miss the '#'
+  let potentialHex = sanitized.startsWith('#') ? sanitized.slice(1) : sanitized;
+  
+  if (potentialHex.length === 6 || potentialHex.length === 3) {
+    // Replace 'O' with '0' (common typo)
+    let fixed = potentialHex.replace(/O/gi, '0');
+    // Ensure it's now a valid hex string
+    if (/^[0-9A-F]{3,6}$/i.test(fixed)) {
+      const withHash = `#${fixed}`;
+      if (chroma.valid(withHash)) return chroma(withHash).hex();
+    }
+  }
+  
+  return null;
+};
+
+export const generateThemeFromSeed = (seedColor: string, isSearch: boolean = false): ThemeConfig => {
   const base = chroma(seedColor);
   const h = base.get('hsl.h');
   const s = base.get('hsl.s');
 
-  const proPrimary = s > 0.8 ? base.desaturate(0.3).hex() : base.hex();
-  const primary = chroma(proPrimary);
+  // If searching, we want the *exact* color they typed, don't desaturate.
+  const primary = isSearch ? base : (s > 0.8 ? base.desaturate(0.3) : base);
+  const primaryHex = primary.hex();
 
-  const secondary = primary.set('hsl.h', h + 25).desaturate(0.4).brighten(0.4);
-  const accent = primary.set('hsl.h', h + 150).saturate(0.2);
+  const secondary = primary.set('hsl.h', (h + 25) % 360).desaturate(0.4).brighten(0.4);
+  const accent = primary.set('hsl.h', (h + 150) % 360).saturate(0.2);
 
   const isDark = primary.luminance() < 0.2;
 
   return {
-    primary: primary.hex(),
+    primary: primaryHex,
     secondary: secondary.hex(),
     accent: accent.hex(),
     background: isDark ? '#0f0f12' : '#faf9f6',
     surface: isDark ? '#1a1a1f' : '#ffffff',
-    moodName: detectMoodFromPalette(primary.hex())
+    moodName: detectMoodFromPalette(primaryHex)
   };
 };
 
 // NATIVE CANVAS FALLBACK (The 100% Guaranteed Extractor)
-const extractColorsViaCanvas = (imageUrl: string): Promise<string[]> => {
+const extractColorsViaCanvas = (imageUrl: string, density: number = 64): Promise<string[]> => {
   return new Promise((resolve) => {
     const img = new Image();
     img.crossOrigin = "Anonymous";
     img.onload = () => {
       const canvas = document.createElement('canvas');
-      const ctx = canvas.getContext('2d');
-      if (!ctx) return resolve(['#7c9473', '#cfd8d7', '#4a5d4e']);
+      const ctx = canvas.getContext('2d', { willReadFrequently: true });
+      if (!ctx) return resolve([]);
 
-      canvas.width = img.width;
-      canvas.height = img.height;
-      ctx.drawImage(img, 0, 0);
+      // Scale down image for processing efficiency
+      const targetSize = density; 
+      canvas.width = targetSize;
+      canvas.height = targetSize;
+      ctx.drawImage(img, 0, 0, targetSize, targetSize);
 
-      // Sample 3 random points for Primary, Secondary, Accent
-      const points = [
-        { x: Math.floor(canvas.width * 0.5), y: Math.floor(canvas.height * 0.5) }, // Center
-        { x: Math.floor(canvas.width * 0.2), y: Math.floor(canvas.height * 0.2) }, // Top-Left
-        { x: Math.floor(canvas.width * 0.8), y: Math.floor(canvas.height * 0.8) }  // Bottom-Right
-      ];
+      const { data } = ctx.getImageData(0, 0, targetSize, targetSize);
+      const hexes: string[] = [];
 
-      const colors = points.map(p => {
-        const [r, g, b] = ctx.getImageData(p.x, p.y, 1, 1).data;
-        return chroma(r, g, b).hex();
-      });
+      for (let i = 0; i < data.length; i += 4) {
+        const r = data[i];
+        const g = data[i + 1];
+        const b = data[i + 2];
+        const a = data[i + 3];
 
-      resolve(colors);
+        // Skip transparent or near-transparent pixels
+        if (a < 128) continue;
+
+        hexes.push(chroma(r, g, b).hex());
+      }
+
+      resolve(hexes);
     };
-    img.onerror = () => resolve(['#7c9473', '#cfd8d7', '#4a5d4e']);
+    img.onerror = () => resolve([]);
     img.src = imageUrl;
   });
 };
 
-export const extractPinterestTheme = async (file: File): Promise<ThemeConfig> => {
+export interface ExtractedResult {
+  config: ThemeConfig;
+  swatches: { hex: string; population: number }[];
+}
+
+/**
+ * ── Duxel AI Vision Engine (K-Means++ in CIELAB) ──
+ * Performs surgical-grade perceptual color clustering to find exactly N dominant colors.
+ */
+const kMeansOKLCH = (samples: string[], k: number = 5, iterations: number = 16): { hex: string, population: number, salience: number }[] => {
+  if (samples.length === 0) return [];
+  
+  // 1. Map samples to OKLCH (The most advanced perceptual space)
+  const points = samples.map(h => {
+    const color = chroma(h);
+    const oklch = color.oklch();
+    const l = oklch[0]; // Lightness
+    const c = oklch[1]; // Chroma (Saturation)
+    const h_val = oklch[2] || 0; // Hue
+    
+    // Perceptual Salience = (Chroma * 2.0) + (Lightness < 0.2 ? 0.3 : 0)
+    return { 
+      hex: h, 
+      l, c, h: h_val,
+      weight: 1.0 + (c * 2.5) + (l < 0.1 ? 0.5 : 0)
+    };
+  });
+
+  // 2. Neuro-Seeding (Smart K-Means++)
+  const centroids: { l: number, c: number, h: number }[] = [];
+  
+  // Initial seed: Most frequent actual pixel
+  const freqMap: Record<string, number> = {};
+  samples.forEach(h => freqMap[h] = (freqMap[h] || 0) + 1);
+  const topSeeds = Object.entries(freqMap).sort((a,b) => b[1] - a[1]);
+  const seed1LCH = chroma(topSeeds[0][0]).oklch();
+  centroids.push({ l: seed1LCH[0], c: seed1LCH[1], h: seed1LCH[2] || 0 });
+
+  for (let i = 1; i < k; i++) {
+    let maxDist = -1;
+    let nextIdx = 0;
+    points.forEach((p, idx) => {
+      let minDist = Infinity;
+      for (const cent of centroids) {
+        // Delta simple for OKLCH
+        const d = Math.sqrt((p.l-cent.l)**2 + (p.c-cent.c)**2 + (Math.sin((p.h-cent.h)*Math.PI/180))**2);
+        if (d < minDist) minDist = d;
+      }
+      if (minDist > maxDist) {
+        maxDist = minDist;
+        nextIdx = idx;
+      }
+    });
+    centroids.push({ l: points[nextIdx].l, c: points[nextIdx].c, h: points[nextIdx].h });
+  }
+
+  // 3. Iterative Refinement
+  let assignments: number[] = new Array(points.length).fill(-1);
+  for (let iter = 0; iter < iterations; iter++) {
+    points.forEach((p, idx) => {
+      let minDist = Infinity;
+      let cIdx = 0;
+      centroids.forEach((cent, idx2) => {
+        const d = Math.sqrt((p.l-cent.l)**2 + (p.c-cent.c)**2 + (Math.sin((p.h-cent.h)*Math.PI/180))**2);
+        if (d < minDist) { minDist = d; cIdx = idx2; }
+      });
+      assignments[idx] = cIdx;
+    });
+
+    const stats = centroids.map(() => ({ l: 0, c: 0, h: 0, w: 0 }));
+    points.forEach((p, idx) => {
+      const ci = assignments[idx];
+      stats[ci].l += p.l * p.weight;
+      stats[ci].c += p.c * p.weight;
+      stats[ci].h += p.h * p.weight;
+      stats[ci].w += p.weight;
+    });
+
+    stats.forEach((s, i) => {
+      if (s.w > 0) centroids[i] = { l: s.l / s.w, c: s.c / s.w, h: s.h / s.w };
+    });
+  }
+
+  const weights = centroids.map(() => 0);
+  assignments.forEach((ci, pi) => weights[ci] += points[pi].weight);
+
+  return centroids.map((c, i) => ({
+    hex: chroma.oklch(c.l, c.c, c.h).hex(),
+    population: weights[i],
+    salience: weights[i] * c.c
+  })).sort((a,b) => b.population - a.population);
+};
+
+const oklchDistance = (p1: {l:number, c:number, h:number}, p2: {l:number, c:number, h:number}) => {
+  // Simple Euclidean distance in OKLCH (with hue as sine component for wrap-around)
+  return Math.sqrt((p1.l-p2.l)**2 + (p1.c-p2.c)**2 + (Math.sin((p1.h-p2.h)*Math.PI/180))**2);
+};
+
+const getDiverseSwatches = (allClusters: { hex: string, population: number, salience: number }[], targetCount: number = 18) => {
+  if (allClusters.length <= targetCount) return allClusters;
+  
+  // 1. Keep Top 5 by population (Dominant Theme)
+  const result = allClusters.slice(0, 5);
+  const remaining = [...allClusters.slice(5)];
+  
+  // 2. Iteratively pick the most "different" and "rare" color from the remaining pool
+  while (result.length < targetCount && remaining.length > 0) {
+    let bestIdx = -1;
+    let maxScore = -1;
+    
+    for (let i = 0; i < remaining.length; i++) {
+        const c_hex = remaining[i].hex;
+        const pMod = chroma(c_hex).oklch();
+        const pLCH = { l: pMod[0], c: pMod[1], h: pMod[2] || 0 };
+        const population = remaining[i].population;
+        
+        let minDist = Infinity;
+        for (const r of result) {
+            const rMod = chroma(r.hex).oklch();
+            const rLCH = { l: rMod[0], c: rMod[1], h: rMod[2] || 0 };
+            const d = oklchDistance(pLCH, rLCH);
+            if (d < minDist) minDist = d;
+        }
+        
+        // Discovery Score: Weight by distance, vibrancy, and RARITY (low population)
+        // Score = (minDist^2) * (chroma + 1) / (population_normalized + 0.5)
+        const densityScore = 1.0 / (population + 0.1);
+        const score = (minDist ** 2) * (1.0 + (pLCH.c * 10.0)) * densityScore; 
+        
+        if (score > maxScore) {
+            maxScore = score;
+            bestIdx = i;
+        }
+    }
+    
+    if (bestIdx !== -1) {
+        result.push(remaining[bestIdx]);
+        remaining.splice(bestIdx, 1);
+    } else {
+        break;
+    }
+  }
+  
+  return result;
+};
+
+const synthesizeNeuroTheme = (clusters: { hex: string, population: number, salience: number }[]): ThemeConfig => {
+  const prevalent = [...clusters].sort((a, b) => b.population - a.population);
+  const salient = [...clusters].sort((a, b) => b.salience - a.salience);
+
+  // 1. Primary Selection (Smart Dominance)
+  let primary = prevalent[0].hex;
+  const pChroma = chroma(primary);
+  // White-Check: If most dominant is near-white (L > 0.9 and low saturation), promote second dominant
+  if (pChroma.get('hsl.l') > 0.85 && pChroma.get('hsl.s') < 0.15 && prevalent[1]) {
+    primary = prevalent[1].hex;
+  }
+
+  // 2. Secondary & Accent (Vibrancy-based)
+  const secondaryConfig = salient.find(c => c.hex !== primary) || prevalent[1] || prevalent[0];
+  const accentConfig = salient.find(c => c.hex !== primary && c.hex !== secondaryConfig.hex) || prevalent[2] || secondaryConfig;
+
+  // 3. Background & Surface (Hierarchy-driven)
+  // Background is a neutralized dominant color
+  const bgBase = chroma(prevalent[0].hex);
+  const bgL = bgBase.get('oklch.l');
+  const isDark = bgL < 0.4;
+  const background = bgBase.set('oklch.l', isDark ? 0.08 : 0.98).set('oklch.c', 0.02).hex();
+
+  // Surface is based on the LEAST dominant cluster (user request)
+  // But we tint it to be a valid UI surface background.
+  const leastDominantHex = prevalent[prevalent.length - 1].hex;
+  const surface = chroma(leastDominantHex).set('oklch.l', isDark ? 0.12 : 1.0).set('oklch.c', 0.03).hex();
+
+  return {
+    primary,
+    secondary: secondaryConfig.hex,
+    accent: accentConfig.hex,
+    background,
+    surface,
+    moodName: 'Neuro Generative'
+  };
+};
+
+export const extractExactTheme = async (file: File): Promise<ExtractedResult> => {
   const imageUrl = URL.createObjectURL(file);
   try {
-    // 1. Attempt AI-grade extraction (node-vibrant)
-    const palette = await Vibrant.from(imageUrl).getPalette();
+    const sampledHexes = await extractColorsViaCanvas(imageUrl, 128); // 16k points for "Advanced" Feel
+    
+    // Neuro-Vision Extraction (OKLCH) - Deep scan for rare colors (64 clusters)
+    const top5 = kMeansOKLCH(sampledHexes, 5);
+    const allClusters = kMeansOKLCH(sampledHexes, 64);
 
-    const pStr = palette.Vibrant?.hex || palette.DarkVibrant?.hex || '#7c9473';
-    const sStr = palette.LightVibrant?.hex || palette.Muted?.hex ||
-      chroma(pStr).set('hsl.h', chroma(pStr).get('hsl.h') + 30).hex();
-    const aStr = palette.DarkMuted?.hex || palette.DarkVibrant?.hex ||
-      chroma(pStr).set('hsl.h', chroma(pStr).get('hsl.h') + 180).hex();
+    if (top5.length === 0) throw new Error('Neural Failure');
 
-    const primary = chroma(pStr);
-    const isDark = primary.luminance() < 0.15;
-
-    const muted = palette.Muted || palette.LightMuted;
-    let bg = isDark ? '#0f0f12' : '#faf9f6';
-    let surface = isDark ? '#1a1a1f' : '#ffffff';
-
-    if (muted) {
-      const m = chroma(muted.hex);
-      bg = isDark ? m.darken(4.5).desaturate(4).hex() : m.brighten(4.5).desaturate(4).hex();
-      surface = isDark ? m.darken(4).desaturate(3).hex() : m.brighten(4.3).desaturate(3).hex();
-    }
+    const config = synthesizeNeuroTheme(top5);
+    config.moodName = detectMoodFromPalette(config.primary);
 
     return {
-      primary: pStr,
-      secondary: sStr,
-      accent: aStr,
-      background: bg,
-      surface: surface,
-      moodName: detectMoodFromPalette(pStr)
+      config,
+      swatches: getDiverseSwatches(allClusters, 18)
     };
   } catch (error) {
-    // 2. Fail-Safe: Switch to Native Canvas Extraction
-    const [p, s, a] = await extractColorsViaCanvas(imageUrl);
+    console.error('Vision failover:', error);
+    const p = '#7c9473';
     return {
-      ...generateThemeFromSeed(p),
-      secondary: s,
-      accent: a,
-      moodName: detectMoodFromPalette(p)
+      config: generateThemeFromSeed(p),
+      swatches: []
     };
   } finally {
     URL.revokeObjectURL(imageUrl);
@@ -288,6 +516,8 @@ export const getFullTheme = (config: ThemeConfig): FullTheme => {
       primary: generatePalette(config.primary),
       secondary: generatePalette(config.secondary),
       accent: generatePalette(config.accent),
+      background: generatePalette(config.background),
+      surface: generatePalette(config.surface),
     }
   };
 };

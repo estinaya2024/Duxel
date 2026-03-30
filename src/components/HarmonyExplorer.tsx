@@ -6,7 +6,7 @@ import { Sparkles } from 'lucide-react';
 
 interface HarmonyExplorerProps {
   config: ThemeConfig;
-  onChange: (key: string, color: string) => void;
+  onUpdate: (newPartialConfig: Partial<ThemeConfig>) => void;
 }
 
 const RULES: { rule: HarmonyRule; label: string; desc: string }[] = [
@@ -16,13 +16,12 @@ const RULES: { rule: HarmonyRule; label: string; desc: string }[] = [
   { rule: 'triadic',       label: 'Triadic',       desc: '120° equidistant hues' },
 ];
 
-export const HarmonyExplorer: React.FC<HarmonyExplorerProps> = ({ config, onChange }) => {
+export const HarmonyExplorer: React.FC<HarmonyExplorerProps> = ({ config, onUpdate }) => {
   const [activeRule, setActiveRule] = useState<HarmonyRule | null>(null);
 
   const applyRule = (rule: HarmonyRule) => {
     const result = applyHarmonyRule(config.primary, rule);
-    onChange('secondary', result.secondary);
-    onChange('accent', result.accent);
+    onUpdate({ secondary: result.secondary, accent: result.accent });
     setActiveRule(rule);
   };
 
