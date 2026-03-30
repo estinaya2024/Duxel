@@ -7,7 +7,6 @@ import { LandingPagePreview } from './components/LandingPagePreview';
 import { MobileAppPreview } from './components/MobileAppPreview';
 import { ProductCardPreview } from './components/ProductCardPreview';
 import { ExportModal } from './components/ExportModal';
-import { WCAGAuditor } from './components/WCAGAuditor';
 import { HarmonyExplorer } from './components/HarmonyExplorer';
 import type { ThemeConfig, FullTheme } from './utils/palette';
 import {
@@ -48,107 +47,31 @@ const decodeThemeFromURL = (): Partial<ThemeConfig> | null => {
 };
 
 // ─── Draggable Sticker ───────────────────────────────────
-interface StickerState {
-  x: number;
-  y: number;
-  size: number;
-}
-
 const DraggableSticker: React.FC<{
   src: string;
   alt: string;
   defaultStyle: React.CSSProperties;
   storageKey: string;
   rotate?: number;
-}> = ({ src, alt, defaultStyle, storageKey, rotate = 0 }) => {
-  const savedRaw = localStorage.getItem(storageKey);
-  const saved: StickerState | null = savedRaw ? JSON.parse(savedRaw) : null;
-
-  const [state, setState] = useState<StickerState>(
-    saved ?? { x: 0, y: 0, size: parseInt(String(defaultStyle.width ?? '140')) }
-  );
-  const [isResizing, setIsResizing] = useState(false);
-  const startRef = useRef<{ mouseX: number; mouseY: number; size: number } | null>(null);
-  const divRef = useRef<HTMLDivElement>(null);
-
-  const saveState = (s: StickerState) => {
-    localStorage.setItem(storageKey, JSON.stringify(s));
-  };
-
-  const onResizeStart = (e: React.PointerEvent) => {
-    e.stopPropagation();
-    e.preventDefault();
-    setIsResizing(true);
-    startRef.current = { mouseX: e.clientX, mouseY: e.clientY, size: state.size };
-
-    const onMove = (me: PointerEvent) => {
-      if (!startRef.current) return;
-      const delta = me.clientX - startRef.current.mouseX + (me.clientY - startRef.current.mouseY);
-      const newSize = Math.max(60, Math.min(350, startRef.current.size + delta));
-      setState(prev => {
-        const next = { ...prev, size: newSize };
-        saveState(next);
-        return next;
-      });
-    };
-    const onUp = () => {
-      setIsResizing(false);
-      window.removeEventListener('pointermove', onMove);
-      window.removeEventListener('pointerup', onUp);
-    };
-    window.addEventListener('pointermove', onMove);
-    window.addEventListener('pointerup', onUp);
-  };
-
+}> = ({ src, alt, defaultStyle, rotate = 0 }) => {
   return (
-    <motion.div
-      ref={divRef}
-      drag
-      dragMomentum={false}
-      dragConstraints={{ left: -600, right: 600, top: -600, bottom: 600 }}
-      onDragEnd={(_, info) => {
-        const next = { ...state, x: state.x + info.offset.x, y: state.y + info.offset.y };
-        setState(next);
-        saveState(next);
-      }}
-      className="duxel-sticker-effect"
+    <div
       style={{
         ...defaultStyle,
-        width: `${state.size}px`,
-        cursor: isResizing ? 'nwse-resize' : 'grab',
         position: 'absolute',
         zIndex: 10,
         userSelect: 'none',
         transform: `rotate(${rotate}deg)`,
       }}
-      whileHover={{ scale: 1.05 }}
-      title="Drag to move · Resize with corner handle"
     >
-      <img src={src} style={{ width: '100%', objectFit: 'contain', pointerEvents: 'none' }} alt={alt} />
-      {/* Resize handle */}
-      <div
-        onPointerDown={onResizeStart}
-        style={{
-          position: 'absolute',
-          bottom: -6,
-          right: -6,
-          width: '16px',
-          height: '16px',
-          borderRadius: '4px',
-          background: 'rgba(0,0,0,0.4)',
-          cursor: 'nwse-resize',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 20,
-          backdropFilter: 'blur(4px)',
-        }}
+      <motion.div
+        className="duxel-sticker-effect"
+        whileHover={{ scale: 1.05 }}
+        style={{ width: '100%', height: '100%' }}
       >
-        <svg width="8" height="8" viewBox="0 0 8 8" fill="white">
-          <circle cx="2" cy="6" r="1" /><circle cx="6" cy="2" r="1" /><circle cx="6" cy="6" r="1" />
-        </svg>
-      </div>
-    </motion.div>
+        <img src={src} style={{ width: '100%', objectFit: 'contain', pointerEvents: 'none' }} alt={alt} />
+      </motion.div>
+    </div>
   );
 };
 
@@ -195,6 +118,27 @@ function App() {
     localStorage.setItem('studio-saved-themes', JSON.stringify(savedThemes));
   }, [config, savedThemes]);
 
+  // Migrate deprecated names from user's cache
+  useEffect(() => {
+    if (config.moodName && config.moodName.toLowerCase() === 'oxford mahogany') {
+      setConfig(prev => ({ ...prev, moodName: 'AESTHETIC' }));
+    }
+  }, [config.moodName]);
+
+  useEffect(() => {
+    setSavedThemes(prev => {
+      let changed = false;
+      const newThemes = prev.map(t => {
+        if (t.name.toLowerCase() === 'oxford mahogany') {
+          changed = true;
+          return { ...t, name: 'AESTHETIC' };
+        }
+        return t;
+      });
+      return changed ? newThemes : prev;
+    });
+  }, []);
+
   const handleColorChange = (key: string, color: string) => {
     setConfig(prev => ({ ...prev, [key]: color }));
     // If user manually changes a color, always reset dark mode display
@@ -217,7 +161,7 @@ function App() {
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    window.alert('📁 Duxel Engine: Local file selected. Starting extraction...');
+    window.alert('Duxel Engine: Local file selected. Starting extraction...');
     setIsExtracting(true);
     try {
       const extractedConfig = await extractPinterestTheme(file);
@@ -225,7 +169,7 @@ function App() {
       setIsDarkMode(false);
     } catch (err) {
       console.error('Extraction error:', err);
-      window.alert('❌ Extraction Error: ' + err);
+      window.alert('Extraction Error: ' + err);
     } finally {
       setIsExtracting(false);
       e.target.value = '';
@@ -295,7 +239,7 @@ function App() {
       </div>
 
       {/* ── Header ─────────────────────────────────────── */}
-      <header className="studio-header" style={{ position: 'relative', zIndex: 10, padding: '3rem 4rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <header className="studio-header" style={{ position: 'fixed', top: 0, left: 0, right: 0, zIndex: 1000, padding: '1.5rem 4rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: isDarkMode ? 'rgba(15, 15, 18, 0.5)' : 'rgba(250, 249, 246, 0.5)', backdropFilter: 'blur(16px)', transition: 'background 0.3s ease', borderBottom: '1px solid rgba(0,0,0,0.05)' }}>
         <motion.div
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
@@ -311,7 +255,7 @@ function App() {
             <div style={{ display: 'flex', gap: '0.6rem', alignItems: 'center', marginTop: '0.2rem' }}>
               <span className="label-sticker" style={{ background: 'var(--theme-accent)', color: 'white' }}>{config.moodName || 'PRO DNA'}</span>
               <span style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
-                Professional Aesthetic System
+VISUAL IDENTITY SYSTEM
               </span>
             </div>
           </div>
@@ -388,6 +332,9 @@ function App() {
           </motion.button>
         </div>
       </header>
+
+      {/* Spacer to prevent content from jumping under the fixed header */}
+      <div style={{ height: '140px' }} />
 
       <SavedPalettes themes={savedThemes} onSelect={(conf) => { setConfig(conf); setIsDarkMode(false); }} onRemove={removeSavedTheme} />
 
@@ -496,7 +443,7 @@ function App() {
                       }}
                     >
                       {isExtracting ? <Loader2 size={18} className="animate-spin" /> : <Camera size={18} />}
-                      {isExtracting ? 'Analyzing...' : 'DNA Capture'}
+                      {isExtracting ? 'Analyzing...' : 'Upload '}
                     </motion.button>
                     <input
                       type="file"
@@ -557,9 +504,6 @@ function App() {
 
           {/* ── Harmony Explorer ─── */}
           <HarmonyExplorer config={config} onChange={handleColorChange} />
-
-          {/* ── WCAG Auditor ─── */}
-          <WCAGAuditor config={config} />
 
           {/* ── Preview Modes ─── */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '3rem' }}>

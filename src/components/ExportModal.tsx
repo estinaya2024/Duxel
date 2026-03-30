@@ -12,11 +12,11 @@ interface ExportModalProps {
 type ExportFormat = 'css' | 'tailwind' | 'figma' | 'ase' | 'share';
 
 const TABS: { id: ExportFormat; label: string }[] = [
-  { id: 'css',     label: 'CSS' },
+  { id: 'css', label: 'CSS' },
   { id: 'tailwind', label: 'Tailwind' },
-  { id: 'figma',   label: 'Figma Tokens' },
-  { id: 'ase',     label: 'ASE Swatch' },
-  { id: 'share',   label: 'Share URL' },
+  { id: 'figma', label: 'Figma Tokens' },
+  { id: 'ase', label: 'ASE Swatch' },
+  { id: 'share', label: 'Share URL' },
 ];
 
 export const ExportModal: React.FC<ExportModalProps> = ({ theme, onClose }) => {
@@ -78,7 +78,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({ theme, onClose }) => {
       ta.value = text;
       document.body.appendChild(ta);
       ta.select();
-      try { document.execCommand('copy'); triggerCopied(); } catch {}
+      try { document.execCommand('copy'); triggerCopied(); } catch { }
       document.body.removeChild(ta);
     }
   };

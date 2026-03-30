@@ -26,7 +26,7 @@ export interface FullTheme {
   };
 }
 
-// 🌐 2024-2026 Elite Aesthetic Archetypes (50+ Massive Library)
+// 2024-2026 Elite Aesthetic Archetypes (50+ Massive Library)
 const PRO_ARCHETYPES = [
   // --- Luxury & Editorial ---
   { name: 'Mocha Mousse', p: '#8B5E3C', s: '#E3CCB2', a: '#F5F5DC' },
@@ -89,13 +89,13 @@ const PRO_ARCHETYPES = [
   { name: 'Riso Blue', p: '#00BFFF', s: '#FFFFFF', a: '#FF007F' },
   { name: 'Washed Indigo', p: '#4B0082', s: '#E6E6FA', a: '#808080' },
   { name: 'Sepia Studio', p: '#704214', s: '#F5DEB3', a: '#1A1A1A' },
-  
+
   // --- Pinterest Vibes & Botanicals ---
   { name: 'Seal & Satin', p: '#6B2717', s: '#CC9E4C', a: '#E0D0B6' },
   { name: 'Russian Sage', p: '#30253E', s: '#C3C88C', a: '#80B9B1' },
   { name: 'Wild Bamboo', p: '#667436', s: '#FFEC8E', a: '#D9828D' },
   { name: 'Arsenic & Morning', p: '#4D2308', s: '#8B9B93', a: '#CFCFCD' },
-  
+
   // --- Pinterest 2025 Editorial Update ---
   { name: 'Champagne Velvet', p: '#F7E7CE', s: '#8E7618', a: '#C0C0C0' },
   { name: 'Alabaster & Ash', p: '#F2F0EB', s: '#B2BEB5', a: '#4B4B4B' },
@@ -109,10 +109,10 @@ const PRO_ARCHETYPES = [
   { name: 'Midnight Velvet', p: '#1A1A2E', s: '#EFC07B', a: '#16213E' },
   { name: 'Emerald & Ivory', p: '#0D4C3C', s: '#F4F1EB', a: '#7BA05B' },
   { name: 'Mocha Luxury', p: '#B08B57', s: '#4A3728', a: '#E3DAC9' },
-  
+
   // --- Deep Aesthetic Diver (v2 Research) ---
   // Dark Academia
-  { name: 'Oxford Mahogany', p: '#5D3A29', s: '#2B1B17', a: '#8C7262' },
+  { name: 'AESTHETIC ', p: '#5D3A29', s: '#2B1B17', a: '#8C7262' },
   { name: 'Velvet Study', p: '#3C1E1E', s: '#1A1211', a: '#6E533A' },
   { name: 'Scholar\'s Ink', p: '#232D3F', s: '#1A1A1A', a: '#AAB8BB' },
   { name: 'Secret Archive', p: '#3B2F2F', s: '#1A1313', a: '#C09876' },
@@ -141,7 +141,7 @@ const PRO_ARCHETYPES = [
 export const getRandomTheme = (): ThemeConfig => {
   const archetype = PRO_ARCHETYPES[Math.floor(Math.random() * PRO_ARCHETYPES.length)];
   const isDark = chroma(archetype.p).luminance() < 0.2;
-  
+
   return {
     primary: archetype.p,
     secondary: archetype.s,
@@ -157,14 +157,14 @@ export const detectMoodFromPalette = (primaryHex: string): string => {
   const h = c.get('hsl.h');
   const s = c.get('hsl.s');
   const l = c.get('hsl.l');
-  
+
   if (s < 0.1) return 'Industrial Mono';
   if (l < 0.15) return 'Midnight Deep';
   if (h > 40 && h < 100) return 'Organic Earth';
   if (h > 180 && h < 260) return 'Cool Horizon';
   if (h > 300 || h < 20) return 'Bold Editorial';
   if (s > 0.8) return 'Vibrant Pop';
-  
+
   return 'Curated Aesthetic';
 };
 
@@ -191,7 +191,7 @@ export const generateThemeFromSeed = (seedColor: string): ThemeConfig => {
   };
 };
 
-// 💎 NATIVE CANVAS FALLBACK (The 100% Guaranteed Extractor)
+// NATIVE CANVAS FALLBACK (The 100% Guaranteed Extractor)
 const extractColorsViaCanvas = (imageUrl: string): Promise<string[]> => {
   return new Promise((resolve) => {
     const img = new Image();
@@ -229,12 +229,12 @@ export const extractPinterestTheme = async (file: File): Promise<ThemeConfig> =>
   try {
     // 1. Attempt AI-grade extraction (node-vibrant)
     const palette = await Vibrant.from(imageUrl).getPalette();
-    
+
     const pStr = palette.Vibrant?.hex || palette.DarkVibrant?.hex || '#7c9473';
-    const sStr = palette.LightVibrant?.hex || palette.Muted?.hex || 
-                 chroma(pStr).set('hsl.h', chroma(pStr).get('hsl.h') + 30).hex();
-    const aStr = palette.DarkMuted?.hex || palette.DarkVibrant?.hex || 
-                 chroma(pStr).set('hsl.h', chroma(pStr).get('hsl.h') + 180).hex();
+    const sStr = palette.LightVibrant?.hex || palette.Muted?.hex ||
+      chroma(pStr).set('hsl.h', chroma(pStr).get('hsl.h') + 30).hex();
+    const aStr = palette.DarkMuted?.hex || palette.DarkVibrant?.hex ||
+      chroma(pStr).set('hsl.h', chroma(pStr).get('hsl.h') + 180).hex();
 
     const primary = chroma(pStr);
     const isDark = primary.luminance() < 0.15;
@@ -274,7 +274,7 @@ export const extractPinterestTheme = async (file: File): Promise<ThemeConfig> =>
 export const generatePalette = (color: string): Palette => {
   const shades = [50, 100, 200, 300, 400, 500, 600, 700, 800, 900];
   const colors = chroma.scale(['#fff', color, '#000']).mode('lch').colors(12);
-  
+
   return shades.map((shade, i) => ({
     shade: shade.toString(),
     hex: colors[i + 1]
@@ -297,7 +297,7 @@ export const getContrastColor = (hex: string): string => {
 };
 
 // ────────────────────────────────────────────────────────
-// 🌙 Dark Theme Auto-Generator
+// Dark Theme Auto-Generator
 // ────────────────────────────────────────────────────────
 export const generateDarkTheme = (config: ThemeConfig): ThemeConfig => {
   const p = chroma(config.primary);
@@ -323,7 +323,7 @@ export const generateDarkTheme = (config: ThemeConfig): ThemeConfig => {
 };
 
 // ────────────────────────────────────────────────────────
-// 🎨 Color Harmony Rules
+// Color Harmony Rules
 // ────────────────────────────────────────────────────────
 export type HarmonyRule = 'monochromatic' | 'analogous' | 'complementary' | 'triadic';
 
@@ -363,53 +363,7 @@ export const applyHarmonyRule = (
 };
 
 // ────────────────────────────────────────────────────────
-// ♿ WCAG Contrast Utilities
-// ────────────────────────────────────────────────────────
-export interface WCAGPair {
-  label: string;
-  fg: string;
-  bg: string;
-  ratio: number;
-  aaLarge: boolean;  // 3:1
-  aaNormal: boolean; // 4.5:1
-  aaaLarge: boolean; // 4.5:1
-  aaaNormal: boolean;// 7:1
-}
-
-export const getWCAGPairs = (config: ThemeConfig): WCAGPair[] => {
-  const pairs: Array<{ label: string; fg: string; bg: string }> = [
-    { label: 'Primary on Background', fg: config.primary, bg: config.background },
-    { label: 'Primary on Surface', fg: config.primary, bg: config.surface },
-    { label: 'Accent on Background', fg: config.accent, bg: config.background },
-    { label: 'Accent on Surface', fg: config.accent, bg: config.surface },
-    { label: 'Secondary on Background', fg: config.secondary, bg: config.background },
-    { label: 'White on Primary', fg: '#ffffff', bg: config.primary },
-    { label: 'Black on Primary', fg: '#111111', bg: config.primary },
-    { label: 'Black on Background', fg: '#111111', bg: config.background },
-  ];
-
-  return pairs.map(({ label, fg, bg }) => {
-    let ratio = 1;
-    try {
-      ratio = chroma.contrast(fg, bg);
-    } catch {
-      ratio = 1;
-    }
-    return {
-      label,
-      fg,
-      bg,
-      ratio,
-      aaLarge: ratio >= 3,
-      aaNormal: ratio >= 4.5,
-      aaaLarge: ratio >= 4.5,
-      aaaNormal: ratio >= 7,
-    };
-  });
-};
-
-// ────────────────────────────────────────────────────────
-// 📤 ASE (Adobe Swatch Exchange) Binary Builder
+// ASE (Adobe Swatch Exchange) Binary Builder
 // ────────────────────────────────────────────────────────
 export const buildASEBuffer = (config: ThemeConfig): ArrayBuffer => {
   const colors: Array<{ name: string; hex: string }> = [

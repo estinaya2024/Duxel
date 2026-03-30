@@ -18,10 +18,9 @@ export const MobileAppPreview: React.FC<MobileAppPreviewProps> = ({ theme, useGr
   const textOnSurface = getContrastColor(surface);
 
   const notifications = [
-    { title: 'New Drop Alert 🔥', sub: 'Forest Breath palette just released', time: '2m', color: primary, read: false },
+    { title: 'New Drop Alert', sub: 'Forest Breath palette just released', time: '2m', color: primary, read: false },
     { title: 'Palette Saved', sub: 'Your Midnight Velvet theme is ready', time: '18m', color: accent, read: false },
     { title: 'Weekly Digest', sub: '12 new community themes this week', time: '2h', color: secondary, read: true },
-    { title: 'Pro Feature Unlocked', sub: 'WCAG Auditor now available', time: '1d', color: accent, read: true },
   ];
 
   return (
@@ -93,7 +92,7 @@ export const MobileAppPreview: React.FC<MobileAppPreviewProps> = ({ theme, useGr
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
               <div>
                 <div style={{ fontSize: '0.7rem', opacity: 0.75, fontWeight: 700 }}>Good Evening</div>
-                <div style={{ fontSize: '1.1rem', fontWeight: 900 }}>Duxel Studio 🎨</div>
+                <div style={{ fontSize: '1.1rem', fontWeight: 900 }}>Duxel Studio </div>
               </div>
               <div
                 style={{
