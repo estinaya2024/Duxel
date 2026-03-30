@@ -153,6 +153,16 @@ const RoleMapper: React.FC<RoleMapperProps> = ({ color, onMap, onClose, isDarkMo
 
 // ─── App ─────────────────────────────────────────────────
 function App() {
+  // Default palette sampled from exmple-img.jpg
+  const DEFAULT_THEME: ThemeConfig = {
+    primary:    '#7a9e6e', // sage green (dominant meadow tone)
+    secondary:  '#c89aab', // dusty pink (wildflower foreground)
+    accent:     '#e8b4c0', // blush pink (flower highlights)
+    background: '#f5f0eb', // warm off-white (painted sky/ground)
+    surface:    '#4a6741', // deep olive (tree masses)
+    moodName:   'Pastoral',
+  };
+
   const [config, setConfig] = useState<ThemeConfig>(() => {
     const fromURL = decodeThemeFromURL();
     if (fromURL) {
@@ -160,7 +170,7 @@ function App() {
       return fromURL as ThemeConfig;
     }
     const saved = localStorage.getItem('theme-config');
-    return saved ? JSON.parse(saved) : generateThemeFromSeed('#7c9473');
+    return saved ? JSON.parse(saved) : DEFAULT_THEME;
   });
 
   const [theme, setTheme] = useState<FullTheme>(() => getFullTheme(config));
@@ -265,13 +275,11 @@ function App() {
 
         setExtractedColors(swatches);
 
-        // Only override theme if the user has no saved theme
-        const hasSavedTheme = localStorage.getItem('theme-config');
-        if (!hasSavedTheme) {
-          setConfig(extractedConfig);
-          setHistory([extractedConfig]);
-          setHistoryIndex(0);
-        }
+        // Always apply the example image palette as the starting theme
+        setConfig(extractedConfig);
+        setHistory([extractedConfig]);
+        setHistoryIndex(0);
+        localStorage.removeItem('theme-config'); // clear stale seed so extracted palette persists
       } catch (err) {
         console.error('Example image extraction failed:', err);
       } finally {
