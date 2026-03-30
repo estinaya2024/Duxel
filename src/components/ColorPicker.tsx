@@ -112,8 +112,8 @@ const EnergyToken: React.FC<EnergyTokenProps> = ({ label, color, onChange, index
               transition: 'background 0.2s',
               pointerEvents: 'auto',
             }}
-            title="Click to manually edit HEX"
-            whileHover={{ background: 'rgba(0,0,0,0.05)' }}
+            onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(0,0,0,0.08)')}
+            onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
           />
         ) : (
           <span
