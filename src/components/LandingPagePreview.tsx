@@ -46,7 +46,7 @@ export const LandingPagePreview: React.FC<LandingPagePreviewProps> = ({ theme, u
               <span>DUXEL<span style={{ fontWeight: 400, opacity: 0.5 }}>STUDIO</span></span>
            </div>
            
-           <div style={{ display: 'flex', gap: '3rem', fontWeight: 600, fontSize: '0.95rem', opacity: 0.7 }}>
+           <div className="landing-nav-links">
               <span style={{ cursor: 'pointer' }}>Process</span>
               <span style={{ cursor: 'pointer' }}>Projects</span>
               <span style={{ cursor: 'pointer' }}>Manifesto</span>
@@ -59,7 +59,7 @@ export const LandingPagePreview: React.FC<LandingPagePreviewProps> = ({ theme, u
         </nav>
 
         {/* Hero Section - Professional Split Design */}
-        <section style={{ padding: '6rem 4rem 10rem', display: 'grid', gridTemplateColumns: '1.1fr 0.9fr', gap: '6rem', alignItems: 'center' }}>
+        <section className="landing-hero-layout" style={{ padding: '6rem 4rem 10rem' }}>
           <motion.div
             initial={{ y: 30, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
@@ -163,7 +163,7 @@ export const LandingPagePreview: React.FC<LandingPagePreviewProps> = ({ theme, u
              </p>
           </div>
           
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '4rem' }}>
+          <div className="landing-features-layout">
             {[
               { title: 'Technical SEO', desc: 'Invisible architecture built for global discovery.', icon: Globe, color: primary },
               { title: 'Brand Identity', desc: 'Visual languages that resonate on a deeper level.', icon: Zap, color: secondary },

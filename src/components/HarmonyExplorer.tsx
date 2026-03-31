@@ -70,7 +70,7 @@ export const HarmonyExplorer: React.FC<HarmonyExplorerProps> = ({ config, onUpda
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0.75rem' }}>
+      <div className="harmony-explorer-grid">
         {RULES.map(({ rule, label, desc }) => {
           const preview = getRulePreview(rule);
           const isActive = activeRule === rule;

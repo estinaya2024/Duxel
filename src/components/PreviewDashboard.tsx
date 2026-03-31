@@ -19,15 +19,13 @@ export const PreviewDashboard: React.FC<PreviewDashboardProps> = ({ theme, useGr
   const textOnSurface = getContrastColor(surface);
 
   return (
-    <div style={{ 
+    <div className="preview-dashboard-layout" style={{ 
       background: surface, 
       color: textOnSurface, 
       minHeight: '800px',
       position: 'relative',
       padding: '0',
       fontFamily: "'Nunito', sans-serif",
-      display: 'grid',
-      gridTemplateColumns: '280px 1fr',
       borderRadius: '32px',
       overflow: 'hidden',
       border: '1px solid var(--border-light)',
@@ -78,7 +76,7 @@ export const PreviewDashboard: React.FC<PreviewDashboardProps> = ({ theme, useGr
 
       {/* Main Content Area */}
       <main style={{ padding: '3rem 4rem', overflowY: 'auto' }}>
-        <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4rem' }}>
+        <header className="product-header-flex" style={{ marginBottom: '4rem' }}>
            <h2 style={{ fontSize: '2.25rem', fontWeight: 900, margin: 0 }}>Collective Feed</h2>
            <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
               <div style={{ padding: '0.6rem 1.25rem', background: background, borderRadius: '12px', border: '1px solid var(--border-subtle)', display: 'flex', alignItems: 'center', gap: '0.75rem', width: '300px' }}>
@@ -91,10 +89,10 @@ export const PreviewDashboard: React.FC<PreviewDashboardProps> = ({ theme, useGr
            </div>
         </header>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) 320px', gap: '4rem' }}>
+        <div className="preview-dashboard-content">
           <div style={{ display: 'flex', flexDirection: 'column', gap: '3rem' }}>
              {/* Featured Stat Cards */}
-             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
+             <div className="preview-dashboard-stats">
                 <div style={{ padding: '2rem', background: background, borderRadius: '24px', border: '1px solid var(--border-subtle)' }}>
                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.5rem' }}>
                       <div style={{ width: '40px', height: '40px', background: `${primary}15`, color: primary, borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>

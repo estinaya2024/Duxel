@@ -106,7 +106,7 @@ const RoleMapper: React.FC<RoleMapperProps> = ({ color, onMap, onClose, isDarkMo
         backdropFilter: 'blur(32px) saturate(180%)',
         padding: '1.5rem', borderRadius: '32px',
         boxShadow: isDarkMode ? '0 30px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.1)' : '0 30px 80px rgba(0,0,0,0.3), 0 0 0 1px rgba(0,0,0,0.05)',
-        minWidth: '400px',
+        width: 'min(400px, 90vw)',
         zIndex: 3001,
       }}
     >
@@ -119,7 +119,7 @@ const RoleMapper: React.FC<RoleMapperProps> = ({ color, onMap, onClose, isDarkMo
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '10px' }}>
+      <div className="role-mapper-grid">
 
         {roles.map(btn => (
           <motion.button
@@ -413,7 +413,7 @@ function App() {
         <div className="living-blob living-blob-3" />
       </div>
 
-      <header className="studio-header" style={{ position: 'fixed', top: 0, left: 0, right: 0, zIndex: 1000, display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: isDarkMode ? 'rgba(15, 15, 18, 0.7)' : 'rgba(250, 249, 246, 0.7)', backdropFilter: 'blur(20px)', transition: 'background 0.3s ease', borderBottom: '1px solid rgba(0,0,0,0.05)' }}>
+      <header className="studio-header" style={{ position: 'fixed', top: 0, left: 0, right: 0, zIndex: 1000, background: isDarkMode ? 'rgba(15, 15, 18, 0.7)' : 'rgba(250, 249, 246, 0.7)', backdropFilter: 'blur(20px)', transition: 'background 0.3s ease', borderBottom: '1px solid rgba(0,0,0,0.05)' }}>
         <motion.div
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
@@ -435,7 +435,7 @@ function App() {
           </div>
         </motion.div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+        <div className="header-actions">
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
@@ -537,7 +537,7 @@ function App() {
             <div className="tool-grid">
               <div>
                 <h2 className="hero-title" style={{ color: 'var(--text-primary)', letterSpacing: '-0.04em', lineHeight: 1.2, fontWeight: 900, marginBottom: '1.5rem' }}>Capture <br /> <span style={{ color: 'var(--theme-primary)' }}>Visual DNA</span></h2>
-                <div style={{ display: 'flex', gap: '2rem', alignItems: 'flex-start' }}>
+                <div className="capture-dna-container">
                   <div style={{ flex: 1 }}>
                     <p style={{ opacity: 0.6, maxWidth: '440px', fontSize: '1.25rem', fontFamily: 'Nunito', fontWeight: 600, lineHeight: 1.6, marginBottom: '2rem' }}>Upload any image to instantly create a professional, high-contrast color palette.</p>
                     <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
@@ -663,7 +663,7 @@ function App() {
             <DraggableSticker src="/steps.png" alt="Steps Sticker" storageKey="sticker-steps" defaultStyle={{ bottom: '-700px', right: '-100px', width: '380px' }} rotate={15} />
             <div className="organic-divider" style={{ marginTop: '2rem' }} />
             <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '2rem' }}>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '1.5rem' }}>
+              <div className="palette-grid">
                 <PaletteDisplay palette={theme.palettes.primary} title="Hero" />
                 <PaletteDisplay palette={theme.palettes.secondary} title="Draft" />
                 <PaletteDisplay palette={theme.palettes.accent} title="Pulse" />
@@ -679,7 +679,7 @@ function App() {
             <div style={{ display: 'flex', justifyContent: 'center', gap: '0.75rem', position: 'relative', flexWrap: 'wrap' }}>
               <div style={{ position: 'absolute', top: '-40px', fontSize: '1.25rem', fontWeight: 800, opacity: 0.4, letterSpacing: '0.1em', fontFamily: 'Amatic SC' }}>CHOOSE YOUR PREVIEW MOCKUP</div>
               {PREVIEW_TABS.map(({ id, label }) => (
-                <button key={id} onClick={() => setPreviewMode(id)} style={{ padding: '0.85rem 2.25rem', borderRadius: '50px', border: 'none', background: previewMode === id ? 'white' : 'transparent', boxShadow: previewMode === id ? 'var(--shadow-primary)' : 'none', fontFamily: 'Amatic SC', fontWeight: 800, fontSize: '1.75rem', color: previewMode === id ? config.primary : 'var(--text-muted)', cursor: 'pointer', transition: 'all 0.2s ease' }}>{label}</button>
+                <button key={id} onClick={() => setPreviewMode(id)} className="preview-tab-btn" style={{ background: previewMode === id ? 'white' : 'transparent', boxShadow: previewMode === id ? 'var(--shadow-primary)' : 'none', color: previewMode === id ? config.primary : 'var(--text-muted)' }}>{label}</button>
               ))}
             </div>
             <AnimatePresence mode="wait">

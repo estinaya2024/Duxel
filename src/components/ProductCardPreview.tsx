@@ -62,13 +62,11 @@ export const ProductCardPreview: React.FC<ProductCardPreviewProps> = ({ theme, u
     >
       {/* Store Header */}
       <div
+        className="product-header-flex"
         style={{
           background: headerBg,
           padding: '2.5rem 3rem',
           color: textOnPrimary,
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
         }}
       >
         <div>
@@ -140,11 +138,9 @@ export const ProductCardPreview: React.FC<ProductCardPreviewProps> = ({ theme, u
 
       {/* Product Grid */}
       <div
+        className="product-grid-layout"
         style={{
           padding: '2.5rem 3rem',
-          display: 'grid',
-          gridTemplateColumns: 'repeat(3, 1fr)',
-          gap: '1.5rem',
           background,
         }}
       >
