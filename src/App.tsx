@@ -155,12 +155,12 @@ const RoleMapper: React.FC<RoleMapperProps> = ({ color, onMap, onClose, isDarkMo
 function App() {
   // Default palette sampled from exmple-img.jpg
   const DEFAULT_THEME: ThemeConfig = {
-    primary:    '#7a9e6e', // sage green (dominant meadow tone)
-    secondary:  '#c89aab', // dusty pink (wildflower foreground)
-    accent:     '#e8b4c0', // blush pink (flower highlights)
+    primary: '#7a9e6e', // sage green (dominant meadow tone)
+    secondary: '#c89aab', // dusty pink (wildflower foreground)
+    accent: '#e8b4c0', // blush pink (flower highlights)
     background: '#f5f0eb', // warm off-white (painted sky/ground)
-    surface:    '#4a6741', // deep olive (tree masses)
-    moodName:   'Pastoral',
+    surface: '#4a6741', // deep olive (tree masses)
+    moodName: 'Pastoral',
   };
 
   const [config, setConfig] = useState<ThemeConfig>(() => {
@@ -506,7 +506,7 @@ function App() {
         </div>
       </header>
 
-      <div style={{ height: '140px' }} />
+      <div style={{ height: '230px' }} />
 
       <SavedPalettes themes={savedThemes} onSelect={(conf) => { setConfig(conf); setIsDarkMode(false); }} onRemove={removeSavedTheme} />
 
@@ -549,6 +549,11 @@ function App() {
                         <input type="file" onChange={handleImageUpload} accept="image/*" style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', opacity: 0, cursor: 'pointer', zIndex: 10 }} />
                       </div>
                       <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={randomizeTheme} style={{ padding: '1rem 1.5rem', borderRadius: '14px', border: '1px solid var(--border-light)', background: 'white', display: 'flex', alignItems: 'center', gap: '0.75rem', cursor: 'pointer', boxShadow: '0 4px 20px rgba(0,0,0,0.05)', color: 'var(--text-primary)', fontSize: '1rem', fontWeight: 800 }}><Wand size={20} /> Surprise</motion.button>
+                    </div>
+
+                    <div style={{ marginTop: '2rem' }}>
+                      <ColorPicker config={config} onChange={handleColorChange} />
+                      <div style={{ fontSize: '0.75rem', fontWeight: 800, opacity: 0.3, letterSpacing: '0.1em', marginTop: '0.5rem' }}>(TAP ANY COLOR TO CUSTOMIZE)</div>
                     </div>
                   </div>
                   {activeImage && (
@@ -656,9 +661,7 @@ function App() {
             </div>
 
             <DraggableSticker src="/steps.png" alt="Steps Sticker" storageKey="sticker-steps" defaultStyle={{ bottom: '-700px', right: '-100px', width: '380px' }} rotate={15} />
-            <ColorPicker config={config} onChange={handleColorChange} />
-            <div style={{ display: 'flex', justifyContent: 'center', marginTop: '-1rem', marginBottom: '1rem', opacity: 0.3, fontSize: '0.8rem', fontWeight: 800, letterSpacing: '0.1em' }}>(TAP ANY COLOR TO CUSTOMIZE)</div>
-            <div className="organic-divider" />
+            <div className="organic-divider" style={{ marginTop: '2rem' }} />
             <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '2rem' }}>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '1.5rem' }}>
                 <PaletteDisplay palette={theme.palettes.primary} title="Hero" />
