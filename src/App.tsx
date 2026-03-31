@@ -506,7 +506,12 @@ function App() {
         </div>
       </header>
 
-      <div style={{ height: '230px' }} />
+      <div className="main-header-spacer" style={{ height: 'var(--header-spacer-height, 280px)' }} />
+      <style>{`
+        @media (min-width: 768px) {
+          .main-header-spacer { height: 230px !important; }
+        }
+      `}</style>
 
       <SavedPalettes themes={savedThemes} onSelect={(conf) => { setConfig(conf); setIsDarkMode(false); }} onRemove={removeSavedTheme} />
 
@@ -572,7 +577,7 @@ function App() {
               </div>
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', position: 'relative', zIndex: 10 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '1rem 1.5rem', background: 'white', borderRadius: '16px', border: '1px solid var(--border-light)', boxShadow: '0 4px 20px rgba(0,0,0,0.03)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.75rem 1.25rem', background: 'white', borderRadius: '16px', border: '1px solid var(--border-light)', boxShadow: '0 4px 20px rgba(0,0,0,0.03)' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>{searchPreview ? <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} style={{ width: '20px', height: '20px', borderRadius: '50%', background: searchPreview, border: '1px solid rgba(0,0,0,0.1)' }} /> : <Search size={22} opacity={0.3} />}</div>
                   <input type="text" placeholder="Search name, HEX, RGB, or CMYK..." onChange={(e) => handleSearch(e.target.value)} onKeyDown={handleKeyDown} style={{ border: 'none', background: 'transparent', width: '100%', outline: 'none', fontWeight: 800, fontSize: '1rem', color: '#000' }} />
                 </div>
@@ -580,7 +585,7 @@ function App() {
                 <AnimatePresence mode="wait">
                   {extractedColors.length > 0 ? (
                     <motion.div key="results" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}>
-                      <div style={{ fontSize: '0.85rem', fontWeight: 900, marginBottom: '0.75rem', display: 'flex', justifyContent: 'space-between' }}><span>VISUAL DNA SYNTHESIS</span><span style={{ opacity: 0.5 }}>DOMINANCE HIERARCHY</span></div>
+                      <div style={{ fontSize: '0.85rem', fontWeight: 900, marginBottom: '0.75rem', display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between' }}><span>VISUAL DNA SYNTHESIS</span><span style={{ opacity: 0.5 }}>DOMINANCE HIERARCHY</span></div>
                       <div className="dna-bar-container" style={{ marginBottom: '2rem' }}>
                         {extractedColors.slice(0, 5).map((c, idx) => {
                           const total = extractedColors.slice(0, 5).reduce((acc, curr) => acc + curr.population, 0);
