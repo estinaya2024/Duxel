@@ -1,5 +1,7 @@
 # Duxel Studio
 
+🌐 **Live:** [https://duxel-j374.vercel.app](https://duxel-j374.vercel.app)
+
 A color palette tool I built for generating and exploring design themes. You can upload any image and it'll pull out the dominant colors, or just search a color name/hex and build from there.
 
 ## What it does
