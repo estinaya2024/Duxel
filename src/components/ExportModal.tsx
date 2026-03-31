@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import type { FullTheme } from '../utils/palette';
-import { buildASEBuffer } from '../utils/palette';
-import { Copy, Check, X, Download, Link } from 'lucide-react';
+import { Copy, Check, X, Download } from 'lucide-react';
 
 interface ExportModalProps {
   theme: FullTheme;
